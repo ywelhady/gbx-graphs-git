@@ -1,0 +1,46 @@
+units: nm, kJ/mol
+
+A:
+  abbreviation: ca
+  name: Calcium
+  constraint: Ca
+  charge: +2
+  model: Amber03
+B:
+  abbreviation: cl
+  name: Chloride
+  constraint: Cl
+  charge: -1
+  model: Amber03
+
+gb:
+  path: pmf/ca-cl-gb.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ca-cl/obc1
+  solvent: OBC1
+mm:
+  path: pmf/ca-cl-mm.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ca-cl/t3p
+  solvent: TIP3P
+dft:
+  path: pmf/ca-cl-dft.dat
+  simulation_path: Fulton (Hadi)
+  solvent: Fulton (Hadi)
+
+gbx:
+  path: pmf/ca-cl-gbx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ca-cl/t3p-obc1
+  solvent: OBC1
+  mm_rMax: 1.0
+gbxx:
+  path: pmf/ca-cl-gbxx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ca-cl/blypd-t3p-obc1
+  solvent: OBC1
+  dft_rMax: 0.485
+  mm_rMin: 0.53
+  mm_rMax: 1.0
+mmx:
+  path: pmf/ca-cl-mmx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ca-cl/blypd-t3p
+  solvent: TIP3P
+  dft_rMax: 0.485
+  mm_rMin: 0.53

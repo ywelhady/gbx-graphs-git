@@ -1,0 +1,32 @@
+units: nm, kJ/mol
+
+A:
+  abbreviation: dma
+  name: Peptoid Backbone
+  constraint: O
+  charge: 0
+  model: STEPs-SOL
+B:
+  abbreviation: dma
+  name: Peptoid Backbone
+  constraint: O
+  charge: 0
+  model: STEPs-SOL
+
+gb:
+  path: pmf/dma-dma-gb.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/dma-dma/obc1
+  solvent: OBC1
+mm:
+  path: pmf/dma-dma-mm.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/dma-dma/t3p
+  solvent: TIP3P
+dft: ~
+
+gbx:
+  path: pmf/dma-dma-gbx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/dma-dma/t3p-obc1
+  solvent: OBC1
+  mm_rMax: 1.2
+gbxx: ~
+mmx: ~

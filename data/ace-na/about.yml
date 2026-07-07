@@ -1,0 +1,46 @@
+units: nm, kJ/mol
+
+A:
+  abbreviation: ace
+  name: Acetate
+  constraint: C2
+  charge: -1
+  model: STEPs-SOL
+B:
+  abbreviation: na
+  name: Sodium
+  constraint: Na
+  charge: +1
+  model: Amber03
+
+gb:
+  path: pmf/ace-na-gb.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-na/obc1
+  solvent: OBC1
+mm:
+  path: pmf/ace-na-mm.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-na/t3p
+  solvent: TIP3P
+dft:
+  path: pmf/ace-na-dft.dat
+  simulation_path: Daily
+  solvent: Daily
+
+gbx:
+  path: pmf/ace-na-gbx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-na/t3p-obc1
+  solvent: OBC1
+  mm_rMax: 1.2
+gbxx:
+  path: pmf/ace-na-gbxx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-na/blypd-t3p-obc1
+  solvent: OBC1
+  dft_rMax: 0.46
+  mm_rMin: 0.525
+  mm_rMax: 1.2
+mmx:
+  path: pmf/ace-na-mmx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-na/blypd-t3p
+  solvent: TIP3P
+  dft_rMax: 0.46
+  mm_rMin: 0.525

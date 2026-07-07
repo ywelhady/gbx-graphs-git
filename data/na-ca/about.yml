@@ -1,0 +1,32 @@
+units: nm, kJ/mol
+
+A:
+  abbreviation: na
+  name: Sodium
+  constraint: Na
+  charge: +1
+  model: Amber03
+B:
+  abbreviation: ca
+  name: Calcium
+  constraint: Ca
+  charge: +2
+  model: Amber03
+
+gb:
+  path: pmf/na-ca-gb.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/na-ca/obc1
+  solvent: OBC1
+mm:
+  path: pmf/na-ca-mm.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/na-ca/t3p
+  solvent: TIP3P
+dft: ~
+
+gbx:
+  path: pmf/na-ca-gbx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/na-ca/t3p-obc1
+  solvent: OBC1
+  mm_rMax: 1.0
+gbxx: ~
+mmx: ~

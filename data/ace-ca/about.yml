@@ -1,0 +1,49 @@
+units: nm, kJ/mol
+
+A:
+  abbreviation: ace
+  name: Acetate
+  constraint: C2
+  charge: -1
+  model: STEPs-SOL
+B:
+  abbreviation: ca
+  name: Calcium
+  constraint: Ca
+  charge: +2
+  model: Amber03
+
+gb:
+  path: data/ace-ca/pmf-gb.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-ca/obc1
+  solvent: OBC1
+mm:
+  path: data/ace-ca/pmf-mm.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-ca/t3p
+  solvent: TIP3P
+dft:
+  path: data/ace-ca/pmf-dft.dat
+  simulation_path: Daily
+  solvent: Daily
+
+gbx:
+  path: data/ace-ca/diff-gbx.dat
+  diffPath: data/ace-ca/diff-gbx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-ca/t3p-obc1
+  solvent: OBC1
+  mm_rMax: 1.2
+gbxx:
+  path: data/ace-ca/diff-gbxx.dat
+  diffPath: data/ace-ca/diff-gbxx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-ca/blypd-t3p-obc1
+  solvent: OBC1
+  dft_rMax: 0.453
+  mm_rMin: 0.55
+  mm_rMax: 1.2
+mmx:
+  path: data/ace-ca/diff-mmx.dat
+  diffPath: data/ace-ca/diff-mmx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-ca/blypd-t3p
+  solvent: TIP3P
+  dft_rMax: 0.453
+  mm_rMin: 0.55

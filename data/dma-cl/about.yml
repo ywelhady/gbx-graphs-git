@@ -1,0 +1,32 @@
+units: nm, kJ/mol
+
+A:
+  abbreviation: dma
+  name: Peptoid Backbone
+  constraint: O
+  charge: 0
+  model: STEPs-SOL
+B:
+  abbreviation: cl
+  name: Chloride
+  constraint: Cl
+  charge: -1
+  model: Amber03
+
+gb:
+  path: pmf/dma-cl-gb.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/dma-cl/obc1
+  solvent: OBC1
+mm:
+  path: pmf/dma-cl-mm.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/dma-cl/t3p
+  solvent: TIP3P
+dft: ~
+
+gbx:
+  path: pmf/dma-cl-gbx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/dma-cl/t3p-obc1
+  solvent: OBC1
+  mm_rMax: 1.0
+gbxx: ~
+mmx: ~

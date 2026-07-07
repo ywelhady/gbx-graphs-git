@@ -1,0 +1,33 @@
+units: nm, kJ/mol
+
+A:
+  abbreviation: ace
+  name: Acetate
+  atom: C2
+  charge: -1
+  model: STEPs-SOL
+B: 
+  abbreviation: ace
+  name: Acetate
+  atom: C2
+  charge: -1
+  model: STEPs-SOL
+
+gb:
+  path: data/ace-ace/pmf-gb.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-ace/obc1
+  solvent: OBC1
+mm:
+  path: data/ace-ace/pmf-mm.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-ace/t3p
+  solvent: TIP3P
+dft: ~
+
+gbx:
+  path: data/ace-ace/pmf-gbx.dat
+  diffPath: data/ace-ace/diff-gbx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-ace/t3p-obc1
+  solvent: OBC1
+  mm_rMax: 1.2
+gbxx: ~
+mmx: ~

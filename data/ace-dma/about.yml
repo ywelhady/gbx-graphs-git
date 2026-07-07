@@ -1,0 +1,32 @@
+units: nm, kJ/mol
+
+A:
+  abbreviation: ace
+  name: Acetate
+  constraint: C2
+  charge: -1
+  model: STEPs-SOL
+B:
+  abbreviation: dma
+  name: Peptoid Backbone DMA
+  constraint: O
+  charge: 0
+  model: STEPs-SOL
+
+gb:
+  path: pmf/ace-dma-gb.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-dma/obc1
+  solvent: OBC1
+mm:
+  path: pmf/ace-dma-mm.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-dma/t3p
+  solvent: TIP3P
+dft: ~
+
+gbx:
+  path: pmf/ace-dma-gbx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/ace-dma/t3p-obc1
+  solvent: OBC1
+  mm_rMax: 1.2
+gbxx: ~
+mmx: ~

@@ -1,0 +1,46 @@
+units: nm, kJ/mol
+
+A:
+  abbreviation: na
+  name: Sodium
+  constraint: Na
+  charge: +1
+  model: Amber03
+B:
+  abbreviation: cl
+  name: Chloride
+  constraint: Cl
+  charge: -1
+  model: Amber03
+
+gb:
+  path: pmf/na-cl-gb.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/na-cl/obc1
+  solvent: OBC1
+mm:
+  path: pmf/na-cl-mm.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/na-cl/t3p
+  solvent: TIP3P
+dft:
+  path: pmf/na-cl-dft.dat
+  simulation_path: Duignan
+  solvent: Duignan
+
+gbx:
+  path: pmf/na-cl-gbx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/na-cl/t3p-obc1
+  solvent: OBC1
+  mm_rMax: 1.0
+gbxx:
+  path: pmf/na-cl-gbxx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/na-cl/blypd-t3p-obc1
+  solvent: OBC1
+  dft_rMax: 0.5
+  mm_rMin: 0.52
+  mm_rMax: 1.0
+mmx:
+  path: pmf/na-cl-mmx.dat
+  simulation_path: gb-pmf-git/ssT3P-amber03-cutoff155/na-cl/blypd-t3p
+  solvent: TIP3P
+  dft_rMax: 0.5
+  mm_rMin: 0.52
