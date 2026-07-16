@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import os
 import yaml
@@ -10,24 +11,25 @@ colorDic = {
     'coulomb': '#9A9A9A',
 
     # base model blocks
-    'dft':  '#9E3F3F',
-    'mm':   '#E0B72F',
+    'dft':  "#9E3F3F",
+    'mm':   '#CFAF00', #'#E0B72F',
     'gb':   '#2B6FA3',
 
     # correction arrows
-    'mmx':  "#E9894E",
+    'mmx':  "#ff8400", #"#E9894E",
     'gbx':  '#2CA6A4',
     'gbxx': "#9B6BE8",
 }
 
-qYlimDic = {-2: (-5, 10),
+qYlimDic = {-2: (-5, 7),
             -1: (-5, 5),
              0: (-5, 5),
              1: (-5, 5),
              2: (-5, 5)}
 
-xLim = (0.2, 1.3)
+xLim = (0.1, 1.3)
 fillOpacity = 0.5
+lineThickness = 1.6
 
 ################################### graphing helpers ###################################
 
@@ -124,64 +126,18 @@ def pubPMF(pairInfo, label=None, show_ylabel=True):
         spine.set_linewidth(0.8)
 
     for line in ax.lines:
-        line.set_linewidth(1.4)
+        line.set_linewidth(lineThickness)
 
     # Only resize scatter markers, NOT fill_between collections
     for coll in ax.collections:
         if isinstance(coll, PathCollection):
-            coll.set_sizes([30])
+            coll.set_sizes([50])
 
     # remove legends in publication plots
     leg = ax.get_legend()
     if leg is not None:
         leg.remove()
 
-# def pubPMF(pairInfo, label=None, show_ylabel=True):
-#     ax = plt.gca()
-#     qprod = pairInfo['A']['charge'] * pairInfo['B']['charge']
-
-#     ax.set_xlim(xLim)
-#     ylims = qYlimDic.get(qprod)
-#     if ylims is not None:
-#         ax.set_ylim(ylims)
-
-#     ax.set_xlabel(r"$r$ (nm)", fontsize=9)
-
-#     if show_ylabel:
-#         ax.set_ylabel(r"PMF (kcal mol$^{-1}$)", fontsize=9)
-#     else:
-#         ax.set_ylabel("")
-#         ax.tick_params(labelleft=False)
-
-#     if label is not None:
-#         ax.set_title(label, fontsize=9, pad=3)
-
-#     ax.tick_params(
-#         axis="both", which="major",
-#         direction="in", length=4, width=0.8,
-#         labelsize=8, top=True, right=True
-#     )
-#     ax.tick_params(
-#         axis="both", which="minor",
-#         direction="in", length=2, width=0.6,
-#         top=True, right=True
-#     )
-#     ax.minorticks_on()
-
-#     for spine in ax.spines.values():
-#         spine.set_linewidth(0.8)
-
-#     for line in ax.lines:
-#         line.set_linewidth(1.4)
-
-#     for coll in ax.collections:
-#         if hasattr(coll, "set_sizes"):
-#             coll.set_sizes([30])
-
-#     # force-remove legends in publication plots
-#     leg = ax.get_legend()
-#     if leg is not None:
-#         leg.remove()
 
 def graphGBX(pairInfo, publication=False):
     sysTitle = pairInfo['A']['name'] + " -- " + pairInfo['B']['name']
@@ -206,21 +162,22 @@ def graphGBX(pairInfo, publication=False):
     corrNewR = interpR(corrData, baseData[:,0])
     basePlusCorr = baseData[:,1] + corrNewR[:,1]
 
+    # Plot Coulomb reference
+    plt.plot(coulombData[:,0], coulombData[:,1], label='Coulomb', color=colorDic['coulomb'], linestyle='--')
     # Plot GB* correction
     plt.fill_between(corrNewR[:,0], baseData[:,1], 
                      basePlusCorr, color=colorDic['gbx'], 
                      alpha=fillOpacity, label='GB* Correction') 
-    # Plot reference data
-    plt.plot(ref1Data[:,0], ref1Data[:,1], label='MM PMF', color=colorDic['mm'])
-    plt.plot(coulombData[:,0], coulombData[:,1], label='Coulomb', color=colorDic['coulomb'], linestyle='--')
     # Plot base data
     plt.plot(baseData[:,0], baseData[:,1], label='GB PMF', color=colorDic['gb'])
-    # Plot transition radii
+    # Plot reference data
+    plt.plot(ref1Data[:,0], ref1Data[:,1], label='MM PMF', color=colorDic['mm'])
+     # Plot transition radii
     plt.scatter(mm_rMax[0], mm_rMax[1], color=colorDic['mm'], marker='o', s=100, label='rMax_MM')
     
     # Plot options
     if publication:
-        pubPMF(pairInfo, label="GB*")
+        pubPMF(pairInfo)
     else:
         plt.title(sysTitle + " GB*")
         plt.xlabel("Distance (nm)")
@@ -276,7 +233,7 @@ def graphGBXX(pairInfo, publication=False):
 
     # Plot options
     if publication:
-        pubPMF(pairInfo, label="GB**")
+        pubPMF(pairInfo)
     else:
         plt.title(sysTitle + " GB**")
         plt.xlabel("Distance (nm)")
@@ -327,7 +284,7 @@ def graphMMX(pairInfo, publication=False):
 
     # Plot options
     if publication:
-        pubPMF(pairInfo, label="MM*")
+        pubPMF(pairInfo)
     else:
         plt.title(sysTitle + " MM*")
         plt.xlabel("Distance (nm)")
@@ -337,29 +294,32 @@ def graphMMX(pairInfo, publication=False):
         plt.legend()
    
 def graphCorrectionPanels(pairInfo, save=None):
+    mpl.rcParams['pdf.fonttype'] = 42
+    mpl.rcParams['ps.fonttype'] = 42
+
     fig, axs = plt.subplots(
         1, 3,
-        figsize=(7.2, 2.35),
+        figsize=(8, 2.7),
         sharex=True,
         sharey=True,
+        gridspec_kw={'wspace': 0, 'hspace': 0}
     )
 
     plt.sca(axs[0])
-    graphGBX(pairInfo, publication=True)
-    pubPMF(pairInfo, label="GB*", show_ylabel=True)
+    graphMMX(pairInfo, publication=True)
+    pubPMF(pairInfo, show_ylabel=True)
 
     plt.sca(axs[1])
     graphGBXX(pairInfo, publication=True)
-    pubPMF(pairInfo, label="GB**", show_ylabel=False)
+    pubPMF(pairInfo, show_ylabel=False)
 
     plt.sca(axs[2])
-    graphMMX(pairInfo, publication=True)
-    pubPMF(pairInfo, label="MM*", show_ylabel=False)
+    graphGBX(pairInfo, publication=True)
+    pubPMF(pairInfo, show_ylabel=False)
 
     fig.tight_layout(w_pad=0.5)
 
     if save is not None:
-        fig.savefig(save, bbox_inches="tight", dpi=600)
+        plt.savefig(save, format="pdf", bbox_inches="tight")
 
-    return fig, axs
     return fig, axs
