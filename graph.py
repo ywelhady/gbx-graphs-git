@@ -21,11 +21,12 @@ colorDic = {
     'gbxx': "#9B6BE8",
 }
 
-qYlimDic = {-2: (-5, 7),
-            -1: (-5, 5),
-             0: (-5, 5),
-             1: (-5, 5),
-             2: (-5, 5)}
+qYlimDic = {-2: (-4.5, 5.5),
+            -1: (-4.5, 5.5),
+             0: (-3, 7),
+             1: (-3, 7),
+             2: (-1, 9),
+             4: (-1, 9),}
 
 xLim = (0.1, 1.3)
 fillOpacity = 0.5
@@ -85,6 +86,18 @@ def coulombZero(rList, qprod, rZero, eps=78.5):
     V_offset = setZero(rList, V, rZero, G0=0)
     return np.array([rList, V_offset]).T
 
+
+def correctedPMF(baseData, corrData):
+    """Calculate the corrected PMF on the base PMF's distance grid."""
+    correction = np.interp(
+        baseData[:, 0],
+        corrData[:, 0],
+        corrData[:, 1],
+        left=0.0,
+        right=0.0,
+    )
+    return baseData[:, 0], baseData[:, 1] + correction
+
 ################################### Graphs ###################################
 
 from matplotlib.collections import PathCollection
@@ -125,8 +138,8 @@ def pubPMF(pairInfo, label=None, show_ylabel=True):
     for spine in ax.spines.values():
         spine.set_linewidth(0.8)
 
-    for line in ax.lines:
-        line.set_linewidth(lineThickness)
+    # for line in ax.lines:
+    #     line.set_linewidth(lineThickness)
 
     # Only resize scatter markers, NOT fill_between collections
     for coll in ax.collections:
@@ -137,6 +150,9 @@ def pubPMF(pairInfo, label=None, show_ylabel=True):
     leg = ax.get_legend()
     if leg is not None:
         leg.remove()
+
+
+################################### Graph Correction Construction ###################################
 
 
 def graphGBX(pairInfo, publication=False):
@@ -163,15 +179,15 @@ def graphGBX(pairInfo, publication=False):
     basePlusCorr = baseData[:,1] + corrNewR[:,1]
 
     # Plot Coulomb reference
-    plt.plot(coulombData[:,0], coulombData[:,1], label='Coulomb', color=colorDic['coulomb'], linestyle='--')
+    plt.plot(coulombData[:,0], coulombData[:,1], label='Coulomb', color=colorDic['coulomb'], linestyle='--', linewidth=lineThickness)
     # Plot GB* correction
     plt.fill_between(corrNewR[:,0], baseData[:,1], 
                      basePlusCorr, color=colorDic['gbx'], 
                      alpha=fillOpacity, label='GB* Correction') 
     # Plot base data
-    plt.plot(baseData[:,0], baseData[:,1], label='GB PMF', color=colorDic['gb'])
+    plt.plot(baseData[:,0], baseData[:,1], label='GB PMF', color=colorDic['gb'], linewidth=lineThickness)
     # Plot reference data
-    plt.plot(ref1Data[:,0], ref1Data[:,1], label='MM PMF', color=colorDic['mm'])
+    plt.plot(ref1Data[:,0], ref1Data[:,1], label='MM PMF', color=colorDic['mm'], linewidth=lineThickness)
      # Plot transition radii
     plt.scatter(mm_rMax[0], mm_rMax[1], color=colorDic['mm'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMax_MM')
     
@@ -221,11 +237,11 @@ def graphGBXX(pairInfo, publication=False):
                      basePlusCorr, color=colorDic['gbxx'], 
                      alpha=fillOpacity, label='GB** Correction')
     # Plot reference data
-    plt.plot(ref1Data[:,0], ref1Data[:,1], label='MM PMF', color=colorDic['mm'])
-    plt.plot(ref2Data[:,0], ref2Data[:,1], label='DFT PMF', color=colorDic['dft'])
-    plt.plot(coulombData[:,0], coulombData[:,1], label='Coulomb', color=colorDic['coulomb'], linestyle='--')
+    plt.plot(ref1Data[:,0], ref1Data[:,1], label='MM PMF', color=colorDic['mm'], linewidth=lineThickness)
+    plt.plot(ref2Data[:,0], ref2Data[:,1], label='DFT PMF', color=colorDic['dft'], linewidth=lineThickness)
+    plt.plot(coulombData[:,0], coulombData[:,1], label='Coulomb', color=colorDic['coulomb'], linestyle='--', linewidth=lineThickness)
     # Plot base data
-    plt.plot(baseData[:,0], baseData[:,1], label='GB PMF', color=colorDic['gb'])
+    plt.plot(baseData[:,0], baseData[:,1], label='GB PMF', color=colorDic['gb'], linewidth=lineThickness)
     # Plot transition radii
     plt.scatter(dft_rMax[0], dft_rMax[1], color=colorDic['dft'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMax_DFT')
     plt.scatter(mm_rMin[0], mm_rMin[1], color=colorDic['mm'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMin_MM')
@@ -274,10 +290,10 @@ def graphMMX(pairInfo, publication=False):
                      basePlusCorr, color=colorDic['mmx'], 
                      alpha=fillOpacity, label='MM* Correction') 
     # Plot reference data
-    plt.plot(ref1Data[:,0], ref1Data[:,1], label='DFT PMF', color=colorDic['dft'])
-    plt.plot(coulombData[:,0], coulombData[:,1], label='Coulomb', color=colorDic['coulomb'], linestyle='--')
+    plt.plot(ref1Data[:,0], ref1Data[:,1], label='DFT PMF', color=colorDic['dft'], linewidth=lineThickness)
+    plt.plot(coulombData[:,0], coulombData[:,1], label='Coulomb', color=colorDic['coulomb'], linestyle='--', linewidth=lineThickness)
     # Plot base data
-    plt.plot(baseData[:,0], baseData[:,1], label='MM PMF', color=colorDic['mm'])
+    plt.plot(baseData[:,0], baseData[:,1], label='MM PMF', color=colorDic['mm'], linewidth=lineThickness)
     # Plot transition radii
     plt.scatter(dft_rMax[0], dft_rMax[1], color=colorDic['dft'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMax_DFT')
     plt.scatter(mm_rMin[0], mm_rMin[1], color=colorDic['mm'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMin_MM')
@@ -323,3 +339,834 @@ def graphCorrectionPanels(pairInfo, save=None):
         plt.savefig(save, format="pdf", bbox_inches="tight")
 
     return fig, axs
+
+
+################################### Graph Correction Construction ###################################
+
+
+def graphGBX(pairInfo, publication=False):
+    sysTitle = pairInfo['A']['name'] + " -- " + pairInfo['B']['name']
+    qprod = pairInfo['A']['charge'] * pairInfo['B']['charge']
+
+    corrData = pairInfo.get('gbx', {}).get('diffData')
+    if corrData is None:
+        print("No GB* data available for this pair.")
+        return
+
+    baseData = pairInfo['gb']['pmfData']
+    mmData = pairInfo['mm']['pmfData']
+    mm_rMax = pairInfo['gbx']['mm_rMax']
+    mm_rMaxPoint = (mm_rMax, getY(mmData, mm_rMax))
+
+    coulombData = coulombZero(baseData[:, 0], qprod, mm_rMax)
+    mmReference = mmData[mmData[:, 0] <= mm_rMax]
+
+    corrNewR = interpR(corrData, baseData[:, 0])
+    basePlusCorr = baseData[:, 1] + corrNewR[:, 1]
+
+    # Shade only through r_MM,max.
+    shadeMask = corrNewR[:, 0] <= mm_rMax
+
+    plt.plot(
+        coulombData[:, 0], coulombData[:, 1],
+        label='Coulomb',
+        color=colorDic['coulomb'],
+        linestyle='--',
+        linewidth=lineThickness,
+    )
+    plt.fill_between(
+        corrNewR[shadeMask, 0],
+        baseData[shadeMask, 1],
+        basePlusCorr[shadeMask],
+        color=colorDic['gbx'],
+        alpha=fillOpacity,
+        label='GB* Correction',
+    )
+    plt.plot(
+        baseData[:, 0], baseData[:, 1],
+        label='GB PMF',
+        color=colorDic['gb'],
+        linewidth=lineThickness,
+    )
+    plt.plot(
+        mmReference[:, 0], mmReference[:, 1],
+        label='MM PMF',
+        color=colorDic['mm'],
+        linewidth=lineThickness,
+    )
+    plt.scatter(
+        mm_rMaxPoint[0], mm_rMaxPoint[1],
+        color=colorDic['mm'],
+        marker='o', s=100, edgecolors='white',
+        zorder=10, label='rMax_MM',
+    )
+
+    if publication:
+        pubPMF(pairInfo)
+    else:
+        plt.title(sysTitle + " GB*")
+        plt.xlabel("Distance (nm)")
+        plt.ylabel("PMF (kcal/mol)")
+        plt.ylim(qYlimDic.get(qprod))
+        plt.xlim(xLim)
+        plt.legend()
+
+
+def graphGBXX(pairInfo, publication=False):
+    sysTitle = pairInfo['A']['name'] + " -- " + pairInfo['B']['name']
+    qprod = pairInfo['A']['charge'] * pairInfo['B']['charge']
+
+    corrData = pairInfo.get('gbxx', {}).get('diffData')
+    if corrData is None:
+        print("No GB** data available for this pair.")
+        return
+
+    baseData = pairInfo['gb']['pmfData']
+    mmData = pairInfo['mm']['pmfData']
+    dftData = pairInfo['dft']['pmfData']
+
+    dft_rMax = pairInfo['gbxx']['dft_rMax']
+    mm_rMin = pairInfo['gbxx']['mm_rMin']
+    mm_rMax = pairInfo['gbxx']['mm_rMax']
+
+    dft_rMaxPoint = (dft_rMax, getY(dftData, dft_rMax))
+    mm_rMinPoint = (mm_rMin, getY(mmData, mm_rMin))
+    mm_rMaxPoint = (mm_rMax, getY(mmData, mm_rMax))
+
+    mmReference = mmData[mmData[:, 0] <= mm_rMax]
+    dftReference = dftData[dftData[:, 0] <= dft_rMax]
+    coulombData = coulombZero(baseData[:, 0], qprod, mm_rMax)
+
+    corrNewR = interpR(corrData, baseData[:, 0])
+    basePlusCorr = baseData[:, 1] + corrNewR[:, 1]
+
+    # Shade only through r_MM,max.
+    shadeMask = corrNewR[:, 0] <= mm_rMax
+
+    plt.fill_between(
+        corrNewR[shadeMask, 0],
+        baseData[shadeMask, 1],
+        basePlusCorr[shadeMask],
+        color=colorDic['gbxx'],
+        alpha=fillOpacity,
+        label='GB** Correction',
+    )
+    plt.plot(
+        mmReference[:, 0], mmReference[:, 1],
+        label='MM PMF',
+        color=colorDic['mm'],
+        linewidth=lineThickness,
+    )
+    plt.plot(
+        dftReference[:, 0], dftReference[:, 1],
+        label='DFT PMF',
+        color=colorDic['dft'],
+        linewidth=lineThickness,
+    )
+    plt.plot(
+        coulombData[:, 0], coulombData[:, 1],
+        label='Coulomb',
+        color=colorDic['coulomb'],
+        linestyle='--',
+        linewidth=lineThickness,
+    )
+    plt.plot(
+        baseData[:, 0], baseData[:, 1],
+        label='GB PMF',
+        color=colorDic['gb'],
+        linewidth=lineThickness,
+    )
+    plt.scatter(
+        dft_rMaxPoint[0], dft_rMaxPoint[1],
+        color=colorDic['dft'],
+        marker='o', s=100, edgecolors='white',
+        zorder=10, label='rMax_DFT',
+    )
+    plt.scatter(
+        mm_rMinPoint[0], mm_rMinPoint[1],
+        color=colorDic['mm'],
+        marker='o', s=100, edgecolors='white',
+        zorder=10, label='rMin_MM',
+    )
+    plt.scatter(
+        mm_rMaxPoint[0], mm_rMaxPoint[1],
+        color=colorDic['mm'],
+        marker='o', s=100, edgecolors='white',
+        zorder=10, label='rMax_MM',
+    )
+
+    if publication:
+        pubPMF(pairInfo)
+    else:
+        plt.title(sysTitle + " GB**")
+        plt.xlabel("Distance (nm)")
+        plt.ylabel("PMF (kcal/mol)")
+        plt.ylim(qYlimDic.get(qprod))
+        plt.xlim(xLim)
+        plt.legend()
+
+
+def graphMMX(pairInfo, publication=False):
+    sysTitle = pairInfo['A']['name'] + " -- " + pairInfo['B']['name']
+    qprod = pairInfo['A']['charge'] * pairInfo['B']['charge']
+
+    corrData = pairInfo.get('mmx', {}).get('diffData')
+    if corrData is None:
+        print("No MM* data available for this pair.")
+        return
+
+    baseData = pairInfo['mm']['pmfData']
+    dftData = pairInfo['dft']['pmfData']
+
+    dft_rMax = pairInfo['mmx']['dft_rMax']
+    mm_rMin = pairInfo['mmx']['mm_rMin']
+    mm_rMax = pairInfo['gbx']['mm_rMax']
+
+    dft_rMaxPoint = (dft_rMax, getY(dftData, dft_rMax))
+    mm_rMinPoint = (mm_rMin, getY(baseData, mm_rMin))
+
+    dftReference = dftData[dftData[:, 0] <= dft_rMax]
+    coulombData = coulombZero(baseData[:, 0], qprod, mm_rMax)
+
+    corrNewR = interpR(corrData, baseData[:, 0])
+    basePlusCorr = baseData[:, 1] + corrNewR[:, 1]
+
+    # Shade only through r_MM,max.
+    shadeMask = corrNewR[:, 0] <= mm_rMax
+
+    plt.fill_between(
+        corrNewR[shadeMask, 0],
+        baseData[shadeMask, 1],
+        basePlusCorr[shadeMask],
+        color=colorDic['mmx'],
+        alpha=fillOpacity,
+        label='MM* Correction',
+    )
+    plt.plot(
+        dftReference[:, 0], dftReference[:, 1],
+        label='DFT PMF',
+        color=colorDic['dft'],
+        linewidth=lineThickness,
+    )
+    plt.plot(
+        coulombData[:, 0], coulombData[:, 1],
+        label='Coulomb',
+        color=colorDic['coulomb'],
+        linestyle='--',
+        linewidth=lineThickness,
+    )
+    plt.plot(
+        baseData[:, 0], baseData[:, 1],
+        label='MM PMF',
+        color=colorDic['mm'],
+        linewidth=lineThickness,
+    )
+    plt.scatter(
+        dft_rMaxPoint[0], dft_rMaxPoint[1],
+        color=colorDic['dft'],
+        marker='o', s=100, edgecolors='white',
+        zorder=10, label='rMax_DFT',
+    )
+    plt.scatter(
+        mm_rMinPoint[0], mm_rMinPoint[1],
+        color=colorDic['mm'],
+        marker='o', s=100, edgecolors='white',
+        zorder=10, label='rMin_MM',
+    )
+
+    if publication:
+        pubPMF(pairInfo)
+    else:
+        plt.title(sysTitle + " MM*")
+        plt.xlabel("Distance (nm)")
+        plt.ylabel("PMF (kcal/mol)")
+        plt.ylim(qYlimDic.get(qprod))
+        plt.xlim(xLim)
+        plt.legend()
+
+
+def graphCorrectionPanels(pairInfo, save=None):
+    mpl.rcParams['pdf.fonttype'] = 42
+    mpl.rcParams['ps.fonttype'] = 42
+
+    fig, axs = plt.subplots(
+        1, 3,
+        figsize=(8, 2.7),
+        sharex=True,
+        sharey=True,
+        gridspec_kw={'wspace': 0, 'hspace': 0},
+    )
+
+    plt.sca(axs[0])
+    graphGBX(pairInfo, publication=True)
+    pubPMF(pairInfo, show_ylabel=True)
+
+    plt.sca(axs[1])
+    graphGBXX(pairInfo, publication=True)
+    pubPMF(pairInfo, show_ylabel=False)
+
+    plt.sca(axs[2])
+    graphMMX(pairInfo, publication=True)
+    pubPMF(pairInfo, show_ylabel=False)
+
+    fig.tight_layout(w_pad=0.5)
+
+    if save is not None:
+        fig.savefig(save, format='pdf', bbox_inches='tight')
+
+    return fig, axs
+
+
+
+################################### Full pair figure ###################################
+
+from matplotlib.lines import Line2D
+
+
+def _formatRadius(value):
+    return "—" if value is None else f"{value:.3f} nm"
+
+
+def _correctionRange(pairInfo, key):
+    data = pairInfo.get(key, {}).get('diffData')
+    if data is None:
+        return "—"
+    return f"{np.min(data[:, 0]):.3f}–{np.max(data[:, 0]):.3f} nm"
+
+
+def _chargedName(species):
+    """Format a species name with its charge in parentheses."""
+    name = species['name']
+    charge = species['charge']
+
+    if charge == 0:
+        return name
+
+    sign = '+' if charge > 0 else '−'
+    magnitude = abs(charge)
+    chargeText = sign if magnitude == 1 else f"{magnitude}{sign}"
+
+    return f"{name} ({chargeText})"
+
+
+def _columnStatus(pairInfo, corrKey):
+    """Return None when a column can be drawn, otherwise its message."""
+    if corrKey in ('gbxx', 'mmx'):
+        if pairInfo.get('dft', {}).get('pmfData') is None:
+            return "No DFT data"
+
+    if pairInfo.get(corrKey, {}).get('diffData') is None:
+        return "No correction data"
+
+    if corrKey in ('gbx', 'gbxx'):
+        if pairInfo.get('gb', {}).get('pmfData') is None:
+            return "No GB data"
+        if pairInfo.get('mm', {}).get('pmfData') is None:
+            return "No MM data"
+
+    if corrKey == 'mmx':
+        if pairInfo.get('mm', {}).get('pmfData') is None:
+            return "No MM data"
+
+    return None
+
+
+def _blankPanel(ax, message):
+    ax.text(
+        0.5, 0.5, message,
+        transform=ax.transAxes,
+        ha='center', va='center',
+        fontsize=10, color='0.45',
+    )
+
+
+def _drawResultPMF(ax, pairInfo, baseKey, corrKey,
+                   dftPlotExtension=0.05):
+    """Draw one resulting PMF panel."""
+    base = pairInfo[baseKey]['pmfData']
+    corr = pairInfo[corrKey]['diffData']
+    r, corrected = correctedPMF(base, corr)
+
+    # Corrected PMF: wide, transparent, and behind other curves
+    ax.plot(
+        r, corrected,
+        color=colorDic[corrKey],
+        linewidth=3.0,
+        alpha=0.75,
+        zorder=1,
+    )
+
+    # Base PMF: solid
+    ax.plot(
+        base[:, 0], base[:, 1],
+        color=colorDic[baseKey],
+        linewidth=lineThickness,
+        zorder=2,
+    )
+
+    # MM reference: dotted; retain its low-r data
+    if corrKey in ('gbx', 'gbxx'):
+        mm = pairInfo['mm']['pmfData']
+        mm_rMax = pairInfo[corrKey]['mm_rMax']
+        mm = mm[mm[:, 0] <= mm_rMax]
+
+        ax.plot(
+            mm[:, 0], mm[:, 1],
+            color=colorDic['mm'],
+            linewidth=lineThickness,
+            linestyle=':',
+            dash_capstyle='round',
+            zorder=4,
+        )
+
+    # DFT reference: dotted; extend beyond construction radius
+    if corrKey in ('gbxx', 'mmx'):
+        dft = pairInfo['dft']['pmfData']
+        dft_rMax = pairInfo[corrKey]['dft_rMax']
+        dft = dft[dft[:, 0] <= dft_rMax + dftPlotExtension]
+
+        ax.plot(
+            dft[:, 0], dft[:, 1],
+            color=colorDic['dft'],
+            linewidth=lineThickness,
+            linestyle=':',
+            dash_capstyle='round',
+            zorder=5,
+        )
+
+
+def graphFullPairPanel(pairInfo, save=None, structureImage=None,
+                       dftPlotExtension=0.05):
+    """
+    Pair title and legend, structure placeholder, correction
+    construction, resulting PMFs, and matching radii.
+    """
+    mpl.rcParams['pdf.fonttype'] = 42
+    mpl.rcParams['ps.fonttype'] = 42
+
+    fig = plt.figure(figsize=(9.2, 7.7))
+
+    outer = fig.add_gridspec(
+        2, 1,
+        height_ratios=[5.65, 0.85],
+        hspace=0.145,
+        left=0.13, right=0.97, top=0.93, bottom=0.06,
+    )
+    main = outer[0].subgridspec(
+        2, 1,
+        height_ratios=[1.20, 4.45],
+        hspace=0.14,
+    )
+    header = main[0].subgridspec(
+        2, 2,
+        height_ratios=[0.40, 0.60],
+        width_ratios=[3.0, 0.85],
+        hspace=0.03,
+        wspace=0.16,
+    )
+    plotGrid = main[1].subgridspec(
+        2, 3, wspace=0, hspace=0
+    )
+    infoGrid = outer[1].subgridspec(
+        1, 3, wspace=0.10
+    )
+
+    # Title
+    axTitle = fig.add_subplot(header[0, 0])
+    axTitle.axis('off')
+
+    pairName = (
+        f"{_chargedName(pairInfo['A'])}"
+        " – "
+        f"{_chargedName(pairInfo['B'])}"
+    )
+    axTitle.text(
+        0, 0.65, pairName,
+        transform=axTitle.transAxes,
+        fontsize=15, fontweight='bold',
+        ha='left', va='center',
+    )
+
+    # Legend
+    axLegend = fig.add_subplot(header[1, 0])
+    axLegend.axis('off')
+
+    # Input order gives GB, MM, DFT, Coulomb across the first row
+    # and GB*, GB**, MM* across the second.
+    legendItems = [
+        Line2D([0], [0], color=colorDic['gb'],
+               lw=lineThickness, label='GB'),
+        Line2D([0], [0], color=colorDic['gbx'],
+               lw=3.0, alpha=0.75, label='GB*'),
+        Line2D([0], [0], color=colorDic['mm'],
+               lw=lineThickness, label='MM'),
+        Line2D([0], [0], color=colorDic['gbxx'],
+               lw=3.0, alpha=0.75, label='GB**'),
+        Line2D([0], [0], color=colorDic['dft'],
+               lw=lineThickness, label='DFT'),
+        Line2D([0], [0], color=colorDic['mmx'],
+               lw=3.0, alpha=0.75, label='MM*'),
+        Line2D([0], [0], color=colorDic['coulomb'],
+               lw=lineThickness, linestyle=':', label='Coulomb'),
+    ]
+
+    axLegend.legend(
+        handles=legendItems,
+        loc='center left',
+        bbox_to_anchor=(0.08, 0.5),
+        ncol=4,
+        frameon=False,
+        fontsize=8.5,
+        handlelength=2.2,
+        columnspacing=1.25,
+        labelspacing=0.35,
+        borderaxespad=0,
+    )
+
+    # Structure placeholder in upper-right corner
+    axStructure = fig.add_subplot(header[:, 1])
+    axStructure.set_xticks([])
+    axStructure.set_yticks([])
+
+    for spine in axStructure.spines.values():
+        spine.set_color('0.75')
+
+    if structureImage is None:
+        axStructure.text(
+            0.5, 0.5, "Pair structure\nplaceholder",
+            transform=axStructure.transAxes,
+            ha='center', va='center',
+            fontsize=9, color='0.45',
+        )
+    else:
+        axStructure.imshow(plt.imread(structureImage))
+        axStructure.set_aspect('equal')
+
+    # Continuous 2 × 3 grid
+    constructionAxes = [fig.add_subplot(plotGrid[0, 0])]
+    constructionAxes += [
+        fig.add_subplot(
+            plotGrid[0, i],
+            sharex=constructionAxes[0],
+            sharey=constructionAxes[0],
+        )
+        for i in range(1, 3)
+    ]
+    resultAxes = [
+        fig.add_subplot(
+            plotGrid[1, i],
+            sharex=constructionAxes[i],
+            sharey=constructionAxes[0],
+        )
+        for i in range(3)
+    ]
+
+    columns = [
+        ('GB*',  'gb', 'gbx',  graphGBX),
+        ('GB**', 'gb', 'gbxx', graphGBXX),
+        ('MM*',  'mm', 'mmx',  graphMMX),
+    ]
+
+    for i, (title, baseKey, corrKey, constructionFn) in enumerate(columns):
+        status = _columnStatus(pairInfo, corrKey)
+
+        constructionAx = constructionAxes[i]
+        plt.sca(constructionAx)
+
+        if status is None:
+            constructionFn(pairInfo, publication=True)
+            for line in constructionAx.lines:
+                if line.get_label() == 'Coulomb':
+                    line.set_linestyle(':')
+        else:
+            _blankPanel(constructionAx, status)
+
+        pubPMF(pairInfo, show_ylabel=(i == 0))
+        constructionAx.set_title(
+            title, fontsize=13, fontweight='bold', pad=5
+        )
+
+        resultAx = resultAxes[i]
+        plt.sca(resultAx)
+
+        if status is None:
+            _drawResultPMF(
+                resultAx, pairInfo, baseKey, corrKey,
+                dftPlotExtension=dftPlotExtension,
+            )
+        else:
+            _blankPanel(resultAx, status)
+
+        pubPMF(pairInfo, show_ylabel=(i == 0))
+
+    # Show distance labels only on the bottom row
+    for ax in constructionAxes:
+        ax.set_xlabel("")
+        ax.tick_params(axis='x', which='both', labelbottom=False)
+
+    constructionAxes[0].set_ylabel(
+        r"(kcal mol$^{-1}$)",
+        fontsize=10, fontweight='normal', labelpad=8,
+    )
+    resultAxes[0].set_ylabel(
+        r"(kcal mol$^{-1}$)",
+        fontsize=10, fontweight='normal', labelpad=8,
+    )
+
+    constructionAxes[0].text(
+        -0.28, 0.5,
+        r"$\mathbf{\Delta U}$ construction",
+        transform=constructionAxes[0].transAxes,
+        rotation=90,
+        ha='center', va='center',
+        fontsize=10, fontweight='bold',
+    )
+    resultAxes[0].text(
+        -0.28, 0.5,
+        "Resulting PMFs",
+        transform=resultAxes[0].transAxes,
+        rotation=90,
+        ha='center', va='center',
+        fontsize=10, fontweight='bold',
+    )
+
+    radiusLabels = {
+        'gbx': [
+            r"$r_{\mathrm{MM,max}}$",
+        ],
+        'gbxx': [
+            r"$r_{\mathrm{DFT,max}}$",
+            r"$r_{\mathrm{MM,min}}$",
+            r"$r_{\mathrm{MM,max}}$",
+        ],
+        'mmx': [
+            r"$r_{\mathrm{DFT,max}}$",
+            r"$r_{\mathrm{MM,min}}$",
+        ],
+    }
+    radiusKeys = {
+        'gbx':  ['mm_rMax'],
+        'gbxx': ['dft_rMax', 'mm_rMin', 'mm_rMax'],
+        'mmx':  ['dft_rMax', 'mm_rMin'],
+    }
+
+    for i, (_, _, corrKey, _) in enumerate(columns):
+        axInfo = fig.add_subplot(infoGrid[i])
+        axInfo.axis('off')
+
+        status = _columnStatus(pairInfo, corrKey)
+        if status is not None:
+            entries = [status]
+        else:
+            entries = [
+                f"{label} = "
+                f"{_formatRadius(pairInfo[corrKey].get(key))}"
+                for label, key in zip(
+                    radiusLabels[corrKey],
+                    radiusKeys[corrKey],
+                )
+            ]
+            entries.append(
+                f"Correction data: {_correctionRange(pairInfo, corrKey)}"
+            )
+
+        axInfo.text(
+            0.02, 0.95, "\n".join(entries),
+            transform=axInfo.transAxes,
+            ha='left', va='top',
+            fontsize=8.5, linespacing=1.45,
+        )
+
+    if save is not None:
+        fig.savefig(save, format='pdf', bbox_inches='tight')
+
+    return fig, constructionAxes, resultAxes
+
+
+
+################################### Grouped ΔU construction panels ###################################
+
+
+def _pairType(pairInfo):
+    """Classify pairs using species abbreviations from about.yml."""
+    abbreviations = {
+        pairInfo['A']['abbreviation'].strip().lower(),
+        pairInfo['B']['abbreviation'].strip().lower(),
+    }
+
+    # A DMA–acetate pair belongs to the DMA group.
+    if 'dma' in abbreviations:
+        return 'DMA–anything'
+    if 'ace' in abbreviations:
+        return 'acetate–anything'
+    return 'ion–ion'
+
+
+def _formatQprod(qprod):
+    return f"{qprod:+g}" if qprod != 0 else "0"
+
+
+def _stackedPairName(pairInfo):
+    """Two species names with a vertical bar between them."""
+    return (
+        f"{_chargedName(pairInfo['A'])}\n"
+        "│\n"
+        f"{_chargedName(pairInfo['B'])}"
+    )
+
+
+def _constructionFigure(groupPairs, heading):
+    """Make one compact construction figure for a list of pairs."""
+    nRows = len(groupPairs)
+
+    # A little more height for a one-row figure's two title levels.
+    figureHeight = 2.45 if nRows == 1 else 1.65 * nRows + 0.6
+    fig = plt.figure(figsize=(9.2, figureHeight))
+
+    # Lower plot top for a one-row group, leaving room for the
+    # group heading and the GB*/GB**/MM* column headings.
+    plotTop = 0.76 if nRows == 1 else 0.88
+
+    grid = fig.add_gridspec(
+        nRows, 3,
+        left=0.21, right=0.97,
+        top=plotTop, bottom=0.12,
+        wspace=0, hspace=0,
+    )
+
+    allAxes = []
+    sharedX = None
+
+    columns = [
+        ('GB*',  'gbx',  graphGBX),
+        ('GB**', 'gbxx', graphGBXX),
+        ('MM*',  'mmx',  graphMMX),
+    ]
+
+    for row, pairInfo in enumerate(groupPairs):
+        firstAx = fig.add_subplot(
+            grid[row, 0],
+            sharex=sharedX,
+        )
+        if sharedX is None:
+            sharedX = firstAx
+
+        rowAxes = [firstAx]
+        rowAxes += [
+            fig.add_subplot(
+                grid[row, col],
+                sharex=sharedX,
+                sharey=firstAx,
+            )
+            for col in (1, 2)
+        ]
+        allAxes.append(rowAxes)
+
+        for col, (title, corrKey, graphFn) in enumerate(columns):
+            ax = rowAxes[col]
+            plt.sca(ax)
+
+            status = _columnStatus(pairInfo, corrKey)
+
+            if status is None:
+                graphFn(pairInfo, publication=True)
+
+                for line in ax.lines:
+                    if line.get_label() == 'Coulomb':
+                        line.set_linestyle(':')
+            else:
+                _blankPanel(ax, status)
+
+            pubPMF(pairInfo, show_ylabel=(col == 0))
+
+            if row == 0:
+                ax.set_title(
+                    title, fontsize=12,
+                    fontweight='bold', pad=5,
+                )
+            else:
+                ax.set_title("")
+
+        firstAx.set_ylabel(
+            r"(kcal mol$^{-1}$)",
+            fontsize=8,
+            labelpad=6,
+        )
+
+        box = firstAx.get_position()
+        fig.text(
+            0.04,
+            (box.y0 + box.y1) / 2,
+            _stackedPairName(pairInfo),
+            ha='center', va='center',
+            fontsize=9, fontweight='bold',
+            linespacing=0.9,
+        )
+
+    # Only the bottom row displays the shared distance axis.
+    for rowAxes in allAxes[:-1]:
+        for ax in rowAxes:
+            ax.set_xlabel("")
+            ax.tick_params(
+                axis='x', which='both',
+                labelbottom=False,
+            )
+
+    for ax in allAxes[-1]:
+        ax.set_xlabel(r"$r$ (nm)", fontsize=9)
+        ax.tick_params(
+            axis='x', which='both',
+            labelbottom=True,
+        )
+
+    fig.suptitle(
+        heading,
+        fontsize=13, fontweight='bold',
+        y=0.98,
+    )
+
+    return fig, allAxes
+
+
+def iterGroupedConstructions(pairInfos):
+    """
+    Yield one figure at a time:
+      1. DMA–anything, acetate–anything, ion–ion.
+      2. Each charge product.
+
+    Yields (grouping, groupName, fig, axes).
+    """
+    byType = {}
+    byQprod = {}
+
+    for pairInfo in pairInfos:
+        pairType = _pairType(pairInfo)
+        qprod = (
+            pairInfo['A']['charge'] *
+            pairInfo['B']['charge']
+        )
+
+        byType.setdefault(pairType, []).append(pairInfo)
+        byQprod.setdefault(qprod, []).append(pairInfo)
+
+    for pairType in (
+        'DMA–anything',
+        'acetate–anything',
+        'ion–ion',
+    ):
+        if pairType in byType:
+            fig, axes = _constructionFigure(
+                byType[pairType],
+                heading=f"ΔU construction | {pairType}",
+            )
+            yield 'type', pairType, fig, axes
+
+    for qprod in sorted(byQprod):
+        fig, axes = _constructionFigure(
+            byQprod[qprod],
+            heading=(
+                "ΔU construction | "
+                f"qA qB = {_formatQprod(qprod)}"
+            ),
+        )
+        yield 'qprod', qprod, fig, axes
