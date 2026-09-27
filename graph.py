@@ -1006,12 +1006,30 @@ def _formatQprod(qprod):
     return f"{qprod:+g}" if qprod != 0 else "0"
 
 
-def _stackedPairName(pairInfo):
-    """Two species names with a vertical bar between them."""
-    return (
-        f"{_chargedName(pairInfo['A'])}\n"
-        "│\n"
-        f"{_chargedName(pairInfo['B'])}"
+def _drawStackedPairName(fig, pairInfo, yCenter):
+    """Center name A, a vertical bar, and name B around a row."""
+    figureHeight = fig.get_size_inches()[1]
+
+    # Convert a fixed physical spacing to figure coordinates.
+    offset = 0.19 / figureHeight
+
+    fig.text(
+        0.04, yCenter + offset,
+        _chargedName(pairInfo['A']),
+        ha='center', va='center',
+        fontsize=9, fontweight='bold',
+    )
+    fig.text(
+        0.04, yCenter,
+        "│",
+        ha='center', va='center',
+        fontsize=9,
+    )
+    fig.text(
+        0.04, yCenter - offset,
+        _chargedName(pairInfo['B']),
+        ha='center', va='center',
+        fontsize=9, fontweight='bold',
     )
 
 
@@ -1019,12 +1037,10 @@ def _constructionFigure(groupPairs, heading):
     """Make one compact construction figure for a list of pairs."""
     nRows = len(groupPairs)
 
-    # A little more height for a one-row figure's two title levels.
     figureHeight = 2.45 if nRows == 1 else 1.65 * nRows + 0.6
     fig = plt.figure(figsize=(9.2, figureHeight))
 
-    # Lower plot top for a one-row group, leaving room for the
-    # group heading and the GB*/GB**/MM* column headings.
+    # Extra heading space for a one-row figure
     plotTop = 0.76 if nRows == 1 else 0.88
 
     grid = fig.add_gridspec(
@@ -1088,20 +1104,14 @@ def _constructionFigure(groupPairs, heading):
                 ax.set_title("")
 
         firstAx.set_ylabel(
-            r"(kcal mol$^{-1}$)",
+            r"Energy (kcal mol$^{-1}$)",
             fontsize=8,
             labelpad=6,
         )
 
         box = firstAx.get_position()
-        fig.text(
-            0.04,
-            (box.y0 + box.y1) / 2,
-            _stackedPairName(pairInfo),
-            ha='center', va='center',
-            fontsize=9, fontweight='bold',
-            linespacing=0.9,
-        )
+        yCenter = (box.y0 + box.y1) / 2
+        _drawStackedPairName(fig, pairInfo, yCenter)
 
     # Only the bottom row displays the shared distance axis.
     for rowAxes in allAxes[:-1]:
@@ -1170,3 +1180,297 @@ def iterGroupedConstructions(pairInfos):
             ),
         )
         yield 'qprod', qprod, fig, axes
+
+
+
+#################################### Group by Model ###################################
+
+
+# def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
+#     """
+#     Plot correction panels in the supplied layout.
+
+#     model: 'gbx', 'gbxx', or 'mmx'
+#     rowYlims: optional list of (minimum, maximum), one per row
+#     """
+#     model = model.lower()
+#     if model not in {'gbx', 'gbxx', 'mmx'}:
+#         raise ValueError("model must be 'gbx', 'gbxx', or 'mmx'")
+
+#     if not layout or not layout[0]:
+#         raise ValueError("layout must contain at least one pair")
+
+#     nRows = len(layout)
+#     nCols = len(layout[0])
+#     if any(len(row) != nCols for row in layout):
+#         raise ValueError("Every layout row must have the same number of pairs")
+#     if rowYlims is not None and len(rowYlims) != nRows:
+#         raise ValueError("rowYlims must contain one range per row")
+
+#     def pairKey(names):
+#         return tuple(sorted(name.strip().lower() for name in names))
+
+#     byPair = {}
+#     for pair in pairInfos:
+#         key = pairKey((
+#             pair['A']['abbreviation'],
+#             pair['B']['abbreviation'],
+#         ))
+#         if key in byPair:
+#             raise ValueError(f"Duplicate pair: {key}")
+#         byPair[key] = pair
+
+#     missing = [
+#         names for row in layout for names in row
+#         if pairKey(names) not in byPair
+#     ]
+#     if missing:
+#         raise ValueError(f"Pairs absent from pairInfos: {missing}")
+
+#     graphFns = {
+#         'gbx': graphGBX,
+#         'gbxx': graphGBXX,
+#         'mmx': graphMMX,
+#     }
+
+#     fig, axes = plt.subplots(
+#         nRows, nCols,
+#         figsize=(3.5 * nCols, 2.4 * nRows),
+#         sharex=True,
+#         sharey='row',
+#         squeeze=False,
+#         gridspec_kw={'wspace': 0, 'hspace': 0},
+#     )
+#     fig.subplots_adjust(
+#         left=0.10, right=0.98, bottom=0.07, top=0.95,
+#     )
+
+#     for rowIndex, row in enumerate(layout):
+#         for colIndex, names in enumerate(row):
+#             pair = byPair[pairKey(names)]
+#             ax = axes[rowIndex, colIndex]
+#             plt.sca(ax)
+
+#             # A YAML entry can exist without loaded correction data.
+#             correction = pair.get(model) or {}
+#             hasCorrection = correction.get('diffData') is not None
+
+#             if model == 'gbxx' and not hasCorrection:
+#                 # Show GB* where a DFT-based GB** correction is unavailable.
+#                 graphGBX(pair, publication=True)
+#             elif model == 'mmx' and not hasCorrection:
+#                 # Leave the panel empty except for its explanatory message.
+#                 ax.set_xlim(*xLim)
+#             else:
+#                 graphFns[model](pair, publication=True)
+
+#             if not (model == 'mmx' and not hasCorrection):
+#                 for line in ax.lines:
+#                     if line.get_label() == 'Coulomb':
+#                         line.set_linestyle(':')
+
+#                 pubPMF(pair, show_ylabel=(colIndex == 0))
+
+#             # Apply shared row limits after plotting.
+#             if rowYlims is not None:
+#                 ax.set_ylim(*rowYlims[rowIndex])
+
+#             if model == 'mmx' and not hasCorrection:
+#                 ax.text(
+#                     0.5, 0.5, 'No DFT data',
+#                     transform=ax.transAxes,
+#                     ha='center', va='center',
+#                     fontsize=10, color='0.4',
+#                     zorder=20,
+#                 )
+
+#             displayNames = [
+#                 'DMA' if name.lower() == 'dma' else name.capitalize()
+#                 for name in names
+#             ]
+#             ax.text(
+#                 0.97, 0.96,
+#                 '–'.join(displayNames),
+#                 transform=ax.transAxes,
+#                 ha='right', va='top',
+#                 fontsize=10, fontweight='bold',
+#                 bbox=dict(
+#                     facecolor='white',
+#                     edgecolor='none',
+#                     alpha=0.75,
+#                     pad=1.5,
+#                 ),
+#                 zorder=21,
+#             )
+
+#             if rowIndex == nRows - 1:
+#                 ax.set_xlabel(r'$r$ (nm)', fontsize=9)
+#             else:
+#                 ax.set_xlabel('')
+#                 ax.tick_params(
+#                     axis='x', which='both',
+#                     labelbottom=False,
+#                 )
+
+#             if colIndex != 0:
+#                 ax.set_ylabel('')
+
+#     fig.suptitle(
+#         {
+#             'gbx': 'GB*',
+#             'gbxx': 'GB**',
+#             'mmx': 'MM*',
+#         }[model] + ' corrections',
+#         fontsize=14, fontweight='bold', y=0.995,
+#     )
+#     return fig, axes
+
+
+
+def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
+    """
+    Plot correction panels in the supplied layout.
+
+    model: 'gbx', 'gbxx', or 'mmx'
+    rowYlims: optional list of (minimum, maximum), one per row
+    """
+    model = model.lower()
+    if model not in {'gbx', 'gbxx', 'mmx'}:
+        raise ValueError("model must be 'gbx', 'gbxx', or 'mmx'")
+
+    if not layout or not layout[0]:
+        raise ValueError("layout must contain at least one pair")
+
+    nRows = len(layout)
+    nCols = len(layout[0])
+    if any(len(row) != nCols for row in layout):
+        raise ValueError("Every layout row must have the same number of pairs")
+    if rowYlims is not None and len(rowYlims) != nRows:
+        raise ValueError("rowYlims must contain one range per row")
+
+    def pairKey(names):
+        return tuple(sorted(name.strip().lower() for name in names))
+
+    byPair = {}
+    for pair in pairInfos:
+        key = pairKey((
+            pair['A']['abbreviation'],
+            pair['B']['abbreviation'],
+        ))
+        if key in byPair:
+            raise ValueError(f"Duplicate pair: {key}")
+        byPair[key] = pair
+
+    missing = [
+        names for row in layout for names in row
+        if pairKey(names) not in byPair
+    ]
+    if missing:
+        raise ValueError(f"Pairs absent from pairInfos: {missing}")
+
+    graphFns = {
+        'gbx': graphGBX,
+        'gbxx': graphGBXX,
+        'mmx': graphMMX,
+    }
+
+    fig, axes = plt.subplots(
+        nRows, nCols,
+        figsize=(3.5 * nCols, 2.4 * nRows),
+        sharex=True,
+        sharey='row',
+        squeeze=False,
+        gridspec_kw={'wspace': 0, 'hspace': 0},
+    )
+    fig.subplots_adjust(
+        left=0.10, right=0.98, bottom=0.07, top=0.95,
+    )
+
+    for rowIndex, row in enumerate(layout):
+        for colIndex, names in enumerate(row):
+            pair = byPair[pairKey(names)]
+            ax = axes[rowIndex, colIndex]
+            plt.sca(ax)
+
+            # Check whether correction data actually loaded.
+            correction = pair.get(model) or {}
+            hasCorrection = correction.get('diffData') is not None
+
+            if model == 'gbxx' and not hasCorrection:
+                # Display GB* when GB** has no DFT-based correction.
+                graphGBX(pair, publication=True)
+            elif model == 'mmx' and not hasCorrection:
+                # Keep an empty panel with axes and an explanation.
+                ax.set_xlim(*xLim)
+            else:
+                graphFns[model](pair, publication=True)
+
+            if not (model == 'mmx' and not hasCorrection):
+                for line in ax.lines:
+                    if line.get_label() == 'Coulomb':
+                        line.set_linestyle(':')
+
+                pubPMF(pair, show_ylabel=(colIndex == 0))
+
+            # pubPMF is skipped for an empty MM* panel, so add its
+            # y-axis label explicitly when it is first in a row.
+            if model == 'mmx' and not hasCorrection and colIndex == 0:
+                ax.set_ylabel(
+                    r'PMF (kcal mol$^{-1}$)',
+                    fontsize=8,
+                    labelpad=6,
+                )
+
+            if rowYlims is not None:
+                ax.set_ylim(*rowYlims[rowIndex])
+
+            if model == 'mmx' and not hasCorrection:
+                ax.text(
+                    0.5, 0.5, 'No DFT data',
+                    transform=ax.transAxes,
+                    ha='center', va='center',
+                    fontsize=10, color='0.4',
+                    zorder=20,
+                )
+
+            # Put the pair name inside the upper-right corner.
+            displayNames = [
+                'DMA' if name.lower() == 'dma' else name.capitalize()
+                for name in names
+            ]
+            ax.text(
+                0.97, 0.96,
+                '–'.join(displayNames),
+                transform=ax.transAxes,
+                ha='right', va='top',
+                fontsize=10, fontweight='bold',
+                bbox=dict(
+                    facecolor='white',
+                    edgecolor='none',
+                    alpha=0.75,
+                    pad=1.5,
+                ),
+                zorder=21,
+            )
+
+            if rowIndex == nRows - 1:
+                ax.set_xlabel(r'$r$ (nm)', fontsize=9)
+            else:
+                ax.set_xlabel('')
+                ax.tick_params(
+                    axis='x', which='both',
+                    labelbottom=False,
+                )
+
+            if colIndex != 0:
+                ax.set_ylabel('')
+
+    fig.suptitle(
+        {
+            'gbx': 'GB*',
+            'gbxx': 'GB**',
+            'mmx': 'MM*',
+        }[model] + ' corrections',
+        fontsize=14, fontweight='bold', y=0.995,
+    )
+    return fig, axes
