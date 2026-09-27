@@ -131,7 +131,7 @@ def pubPMF(pairInfo, label=None, show_ylabel=True):
     # Only resize scatter markers, NOT fill_between collections
     for coll in ax.collections:
         if isinstance(coll, PathCollection):
-            coll.set_sizes([50])
+            coll.set_sizes([40])
 
     # remove legends in publication plots
     leg = ax.get_legend()
@@ -173,7 +173,7 @@ def graphGBX(pairInfo, publication=False):
     # Plot reference data
     plt.plot(ref1Data[:,0], ref1Data[:,1], label='MM PMF', color=colorDic['mm'])
      # Plot transition radii
-    plt.scatter(mm_rMax[0], mm_rMax[1], color=colorDic['mm'], marker='o', s=100, label='rMax_MM')
+    plt.scatter(mm_rMax[0], mm_rMax[1], color=colorDic['mm'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMax_MM')
     
     # Plot options
     if publication:
@@ -227,9 +227,9 @@ def graphGBXX(pairInfo, publication=False):
     # Plot base data
     plt.plot(baseData[:,0], baseData[:,1], label='GB PMF', color=colorDic['gb'])
     # Plot transition radii
-    plt.scatter(dft_rMax[0], dft_rMax[1], color=colorDic['dft'], marker='o', s=100, label='rMax_DFT')
-    plt.scatter(mm_rMin[0], mm_rMin[1], color=colorDic['mm'], marker='o', s=100, label='rMin_MM')
-    plt.scatter(mm_rMax[0], mm_rMax[1], color=colorDic['mm'], marker='o', s=100, label='rMax_MM')
+    plt.scatter(dft_rMax[0], dft_rMax[1], color=colorDic['dft'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMax_DFT')
+    plt.scatter(mm_rMin[0], mm_rMin[1], color=colorDic['mm'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMin_MM')
+    plt.scatter(mm_rMax[0], mm_rMax[1], color=colorDic['mm'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMax_MM')
 
     # Plot options
     if publication:
@@ -279,8 +279,8 @@ def graphMMX(pairInfo, publication=False):
     # Plot base data
     plt.plot(baseData[:,0], baseData[:,1], label='MM PMF', color=colorDic['mm'])
     # Plot transition radii
-    plt.scatter(dft_rMax[0], dft_rMax[1], color=colorDic['dft'], marker='o', s=100, label='rMax_DFT')
-    plt.scatter(mm_rMin[0], mm_rMin[1], color=colorDic['mm'], marker='o', s=100, label='rMin_MM')
+    plt.scatter(dft_rMax[0], dft_rMax[1], color=colorDic['dft'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMax_DFT')
+    plt.scatter(mm_rMin[0], mm_rMin[1], color=colorDic['mm'], marker='o', s=100, edgecolors='white', zorder = 10, label='rMin_MM')
 
     # Plot options
     if publication:
@@ -306,7 +306,7 @@ def graphCorrectionPanels(pairInfo, save=None):
     )
 
     plt.sca(axs[0])
-    graphMMX(pairInfo, publication=True)
+    graphGBX(pairInfo, publication=True)
     pubPMF(pairInfo, show_ylabel=True)
 
     plt.sca(axs[1])
@@ -314,7 +314,7 @@ def graphCorrectionPanels(pairInfo, save=None):
     pubPMF(pairInfo, show_ylabel=False)
 
     plt.sca(axs[2])
-    graphGBX(pairInfo, publication=True)
+    graphMMX(pairInfo, publication=True)
     pubPMF(pairInfo, show_ylabel=False)
 
     fig.tight_layout(w_pad=0.5)
