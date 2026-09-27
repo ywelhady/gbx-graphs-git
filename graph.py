@@ -915,7 +915,7 @@ def graphFullPairPanel(pairInfo, save=None, structureImage=None,
 
     constructionAxes[0].text(
         -0.28, 0.5,
-        r"$\mathbf{\Delta U}$ construction",
+        r"$\mathbf{\Delta U}$ Construction",
         transform=constructionAxes[0].transAxes,
         rotation=90,
         ha='center', va='center',
@@ -1167,7 +1167,7 @@ def iterGroupedConstructions(pairInfos):
         if pairType in byType:
             fig, axes = _constructionFigure(
                 byType[pairType],
-                heading=f"ΔU construction | {pairType}",
+                heading=f"ΔU Construction | {pairType}",
             )
             yield 'type', pairType, fig, axes
 
@@ -1175,7 +1175,7 @@ def iterGroupedConstructions(pairInfos):
         fig, axes = _constructionFigure(
             byQprod[qprod],
             heading=(
-                "ΔU construction | "
+                "ΔU Construction | "
                 f"qA qB = {_formatQprod(qprod)}"
             ),
         )
@@ -1184,7 +1184,6 @@ def iterGroupedConstructions(pairInfos):
 
 
 #################################### Group by Model ###################################
-
 
 # def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
 #     """
@@ -1251,15 +1250,15 @@ def iterGroupedConstructions(pairInfos):
 #             ax = axes[rowIndex, colIndex]
 #             plt.sca(ax)
 
-#             # A YAML entry can exist without loaded correction data.
+#             # Check whether correction data actually loaded.
 #             correction = pair.get(model) or {}
 #             hasCorrection = correction.get('diffData') is not None
 
 #             if model == 'gbxx' and not hasCorrection:
-#                 # Show GB* where a DFT-based GB** correction is unavailable.
+#                 # Display GB* when GB** has no DFT-based correction.
 #                 graphGBX(pair, publication=True)
 #             elif model == 'mmx' and not hasCorrection:
-#                 # Leave the panel empty except for its explanatory message.
+#                 # Keep an empty panel with axes and an explanation.
 #                 ax.set_xlim(*xLim)
 #             else:
 #                 graphFns[model](pair, publication=True)
@@ -1271,7 +1270,15 @@ def iterGroupedConstructions(pairInfos):
 
 #                 pubPMF(pair, show_ylabel=(colIndex == 0))
 
-#             # Apply shared row limits after plotting.
+#             # pubPMF is skipped for an empty MM* panel, so add its
+#             # y-axis label explicitly when it is first in a row.
+#             if model == 'mmx' and not hasCorrection and colIndex == 0:
+#                 ax.set_ylabel(
+#                     r'PMF (kcal mol$^{-1}$)',
+#                     fontsize=8,
+#                     labelpad=6,
+#                 )
+
 #             if rowYlims is not None:
 #                 ax.set_ylim(*rowYlims[rowIndex])
 
@@ -1284,6 +1291,7 @@ def iterGroupedConstructions(pairInfos):
 #                     zorder=20,
 #                 )
 
+#             # Put the pair name inside the upper-right corner.
 #             displayNames = [
 #                 'DMA' if name.lower() == 'dma' else name.capitalize()
 #                 for name in names
@@ -1324,8 +1332,6 @@ def iterGroupedConstructions(pairInfos):
 #         fontsize=14, fontweight='bold', y=0.995,
 #     )
 #     return fig, axes
-
-
 
 def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
     """
@@ -1374,6 +1380,14 @@ def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
         'mmx': graphMMX,
     }
 
+    nameLabels = {
+        'ace': 'Acetate',
+        'dma': 'DMA',
+        'ca': 'Ca',
+        'cl': 'Cl',
+        'na': 'Na',
+    }
+
     fig, axes = plt.subplots(
         nRows, nCols,
         figsize=(3.5 * nCols, 2.4 * nRows),
@@ -1383,7 +1397,7 @@ def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
         gridspec_kw={'wspace': 0, 'hspace': 0},
     )
     fig.subplots_adjust(
-        left=0.10, right=0.98, bottom=0.07, top=0.95,
+        left=0.10, right=0.98, bottom=0.12, top=0.97,
     )
 
     for rowIndex, row in enumerate(layout):
@@ -1392,15 +1406,14 @@ def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
             ax = axes[rowIndex, colIndex]
             plt.sca(ax)
 
-            # Check whether correction data actually loaded.
             correction = pair.get(model) or {}
             hasCorrection = correction.get('diffData') is not None
 
             if model == 'gbxx' and not hasCorrection:
-                # Display GB* when GB** has no DFT-based correction.
+                # Show GB* when GB** has no DFT-based correction.
                 graphGBX(pair, publication=True)
             elif model == 'mmx' and not hasCorrection:
-                # Keep an empty panel with axes and an explanation.
+                # Keep an empty panel with axes.
                 ax.set_xlim(*xLim)
             else:
                 graphFns[model](pair, publication=True)
@@ -1411,15 +1424,6 @@ def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
                         line.set_linestyle(':')
 
                 pubPMF(pair, show_ylabel=(colIndex == 0))
-
-            # pubPMF is skipped for an empty MM* panel, so add its
-            # y-axis label explicitly when it is first in a row.
-            if model == 'mmx' and not hasCorrection and colIndex == 0:
-                ax.set_ylabel(
-                    r'PMF (kcal mol$^{-1}$)',
-                    fontsize=8,
-                    labelpad=6,
-                )
 
             if rowYlims is not None:
                 ax.set_ylim(*rowYlims[rowIndex])
@@ -1433,9 +1437,8 @@ def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
                     zorder=20,
                 )
 
-            # Put the pair name inside the upper-right corner.
             displayNames = [
-                'DMA' if name.lower() == 'dma' else name.capitalize()
+                nameLabels.get(name.lower(), name)
                 for name in names
             ]
             ax.text(
@@ -1453,6 +1456,17 @@ def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
                 zorder=21,
             )
 
+            # Set this after pubPMF so both plotted and blank panels
+            # receive the same label.
+            if colIndex == 0:
+                ax.set_ylabel(
+                    r'$\mathbf{\Delta U Construction}$ (kcal mol$^{-1}$)',
+                    fontsize=9,
+                    labelpad=6,
+                )
+            else:
+                ax.set_ylabel('')
+
             if rowIndex == nRows - 1:
                 ax.set_xlabel(r'$r$ (nm)', fontsize=9)
             else:
@@ -1462,15 +1476,4 @@ def graphCorrectionGrid(pairInfos, layout, model='gbx', rowYlims=None):
                     labelbottom=False,
                 )
 
-            if colIndex != 0:
-                ax.set_ylabel('')
-
-    fig.suptitle(
-        {
-            'gbx': 'GB*',
-            'gbxx': 'GB**',
-            'mmx': 'MM*',
-        }[model] + ' corrections',
-        fontsize=14, fontweight='bold', y=0.995,
-    )
     return fig, axes
